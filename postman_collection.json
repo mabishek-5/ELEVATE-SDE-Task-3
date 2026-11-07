@@ -1,0 +1,180 @@
+{
+  "info": {
+    "name": "CredVault Task 3 API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5000"
+    },
+    {
+      "key": "applicationId",
+      "value": ""
+    },
+    {
+      "key": "certificateId",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1 Request Certificate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Priya Sharma\", \"phone\": \"9123456780\", \"gender\": \"Female\", \"city\": \"Bengaluru\", \"state\": \"Karnataka\"}"
+        },
+        "url": "{{baseUrl}}/api/applications"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if(pm.response.code===201) pm.collectionVariables.set('applicationId',pm.response.json().applicationId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Track Application",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/applications/track/{{applicationId}}"
+      }
+    },
+    {
+      "name": "3 Verify Certificate",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/certificates/verify/{{certificateId}}"
+      }
+    },
+    {
+      "name": "4 Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}"
+        },
+        "url": "{{baseUrl}}/api/admin/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if(pm.response.code===200) pm.collectionVariables.set('adminToken',pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 Admin List Applications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/applications"
+      }
+    },
+    {
+      "name": "6 Approve Application",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/applications/{{applicationId}}/approve"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if(pm.response.code===200 && pm.response.json().certificateId) pm.collectionVariables.set('certificateId',pm.response.json().certificateId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 Reject Application (replace ID with a pending application)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"Incomplete details\"}"
+        },
+        "url": "{{baseUrl}}/api/admin/applications/REPLACE_ID/reject"
+      }
+    },
+    {
+      "name": "8 Admin List Certificates",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/certificates"
+      }
+    },
+    {
+      "name": "9 Revoke Certificate",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/certificates/{{certificateId}}/revoke"
+      }
+    }
+  ]
+}
